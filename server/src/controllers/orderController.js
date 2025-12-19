@@ -1,5 +1,9 @@
-const prisma = require('../config/db');
-const { emitToUser, emitToDrivers, emitToOrder } = require('../config/socket');
+const prisma = require("../config/db");
+const {
+  emitToUser,
+  emitToDrivers,
+  emitToOrder,
+} = require("../config/socket.js");
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -24,7 +28,7 @@ const createOrder = async (req, res) => {
       pickupLat,
       pickupLng,
       dropoffLat,
-      dropoffLng
+      dropoffLng,
     );
 
     const basePrice = 500;
@@ -59,15 +63,15 @@ const createOrder = async (req, res) => {
     });
 
     // Notify all online drivers
-    emitToDrivers('order:new', order);
+    emitToDrivers("order:new", order);
 
     res.status(201).json({
-      message: 'Order created successfully',
+      message: "Order created successfully",
       order,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -92,13 +96,13 @@ const getMyOrders = async (req, res) => {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -130,20 +134,20 @@ const getOrder = async (req, res) => {
           },
         },
         tracking: {
-          orderBy: { timestamp: 'desc' },
+          orderBy: { timestamp: "desc" },
           take: 1,
         },
       },
     });
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     res.json(order);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -152,7 +156,7 @@ const getOrder = async (req, res) => {
 const getPendingOrders = async (req, res) => {
   try {
     const orders = await prisma.order.findMany({
-      where: { status: 'PENDING' },
+      where: { status: "PENDING" },
       include: {
         customer: {
           select: {
@@ -162,13 +166,13 @@ const getPendingOrders = async (req, res) => {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -183,7 +187,7 @@ const getDriverOrders = async (req, res) => {
     });
 
     if (!driver) {
-      return res.status(404).json({ message: 'Driver profile not found' });
+      return res.status(404).json({ message: "Driver profile not found" });
     }
 
     const orders = await prisma.order.findMany({
@@ -197,13 +201,13 @@ const getDriverOrders = async (req, res) => {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -219,11 +223,11 @@ const acceptOrder = async (req, res) => {
     });
 
     if (!driver) {
-      return res.status(404).json({ message: 'Driver profile not found' });
+      return res.status(404).json({ message: "Driver profile not found" });
     }
 
     if (!driver.isApproved) {
-      return res.status(403).json({ message: 'Driver not approved yet' });
+      return res.status(403).json({ message: "Driver not approved yet" });
     }
 
     const order = await prisma.order.findUnique({
@@ -231,18 +235,18 @@ const acceptOrder = async (req, res) => {
     });
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.status !== 'PENDING') {
-      return res.status(400).json({ message: 'Order is no longer available' });
+    if (order.status !== "PENDING") {
+      return res.status(400).json({ message: "Order is no longer available" });
     }
 
     const updatedOrder = await prisma.order.update({
       where: { id },
       data: {
         driverId: driver.id,
-        status: 'ACCEPTED',
+        status: "ACCEPTED",
       },
       include: {
         customer: {
@@ -267,21 +271,21 @@ const acceptOrder = async (req, res) => {
     });
 
     // Notify customer
-    emitToUser(order.customerId, 'order:accepted', {
+    emitToUser(order.customerId, "order:accepted", {
       orderId: id,
       driver: updatedOrder.driver,
     });
 
     // Remove from available orders for other drivers
-    emitToDrivers('order:taken', { orderId: id });
+    emitToDrivers("order:taken", { orderId: id });
 
     res.json({
-      message: 'Order accepted successfully',
+      message: "Order accepted successfully",
       order: updatedOrder,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -302,18 +306,18 @@ const updateOrderStatus = async (req, res) => {
     });
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     if (order.driverId !== driver.id) {
-      return res.status(403).json({ message: 'Not authorized' });
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     const updateData = { status };
 
-    if (status === 'PICKED_UP') {
+    if (status === "PICKED_UP") {
       updateData.pickedUpAt = new Date();
-    } else if (status === 'DELIVERED') {
+    } else if (status === "DELIVERED") {
       updateData.deliveredAt = new Date();
 
       await prisma.driver.update({
@@ -330,13 +334,13 @@ const updateOrderStatus = async (req, res) => {
     });
 
     // Notify customer of status change
-    emitToUser(order.customerId, 'order:status', {
+    emitToUser(order.customerId, "order:status", {
       orderId: id,
       status,
     });
 
     // Emit to order room
-    emitToOrder(id, 'order:status', {
+    emitToOrder(id, "order:status", {
       orderId: id,
       status,
     });
@@ -347,7 +351,7 @@ const updateOrderStatus = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -363,20 +367,22 @@ const cancelOrder = async (req, res) => {
     });
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     if (order.customerId !== userId) {
-      return res.status(403).json({ message: 'Not authorized' });
+      return res.status(403).json({ message: "Not authorized" });
     }
 
-    if (!['PENDING', 'ACCEPTED'].includes(order.status)) {
-      return res.status(400).json({ message: 'Cannot cancel order at this stage' });
+    if (!["PENDING", "ACCEPTED"].includes(order.status)) {
+      return res
+        .status(400)
+        .json({ message: "Cannot cancel order at this stage" });
     }
 
     const updatedOrder = await prisma.order.update({
       where: { id },
-      data: { status: 'CANCELLED' },
+      data: { status: "CANCELLED" },
     });
 
     // Notify driver if assigned
@@ -385,17 +391,17 @@ const cancelOrder = async (req, res) => {
         where: { id: order.driverId },
       });
       if (driver) {
-        emitToUser(driver.userId, 'order:cancelled', { orderId: id });
+        emitToUser(driver.userId, "order:cancelled", { orderId: id });
       }
     }
 
     res.json({
-      message: 'Order cancelled successfully',
+      message: "Order cancelled successfully",
       order: updatedOrder,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -428,3 +434,4 @@ module.exports = {
   updateOrderStatus,
   cancelOrder,
 };
+
