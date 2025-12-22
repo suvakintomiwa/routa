@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import DeliveryMap from '../components/Map/DeliveryMap';
-import socketService from '../services/socketService';
+import DeliveryMap from '../components/Map/DeliveryMap.jsx';
+import socketService from '../services/socketService.js';
 
 const CreateOrder = () => {
   const [pickupLocation, setPickupLocation] = useState(null);

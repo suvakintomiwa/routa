@@ -242,7 +242,7 @@ const LocationSearch = ({ placeholder, value, onChange, onSelect, onClear, isLoa
 };
 
 // Main DeliveryMap component
-const DeliveryMap = ({
+const RouteMap = ({
   onRouteCalculated,
   pickupLocation,
   dropoffLocation,
