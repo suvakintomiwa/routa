@@ -588,7 +588,7 @@ const Dashboard = () => {
                   Call Us
                 </a>
                 <a
-                  href="https://wa.me/2348000000000"
+                  href="https://wa.me/2349033518016"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-5 py-2.5 rounded-full transition font-medium"
@@ -621,7 +621,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-gray-400">Built on</span>
                 <span className="text-blue-600 font-medium">Base</span>
-                <span>⛓️</span>
+               
               </div>
             </div>
           </div>
